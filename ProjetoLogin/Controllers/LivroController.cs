@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProjetoLivraria.Data;
-using ProjetoLivraria.Models;
+using Microsoft.EntityFrameworkCore;
+using ProjetoLogin.Data;
+using ProjetoLogin.Models;
 
-namespace ProjetoLivraria.Controllers
+namespace ProjetoLogin.Controllers
 {
     public class LivroController(LivrariaContext db) : Controller
     {
@@ -31,9 +32,12 @@ namespace ProjetoLivraria.Controllers
                 return View(livro);
             }
 
-            if (db.Livros.Any(l => l.Isbn == livro.Isbn))
+            if (await db.Livros.AnyAsync(l => l.Isbn == livro.Isbn))
             {
-                ModelState.AddModelError(nameof(Livro.Isbn), "Já existe um livro com este ISBN.");
+                ModelState.AddModelError(
+                    nameof(Livro.Isbn),
+                    "Já existe um livro com este ISBN.");
+
                 return View(livro);
             }
 
@@ -41,5 +45,8 @@ namespace ProjetoLivraria.Controllers
             await db.SaveChangesAsync();
 
             TempData["Mensagem"] = $"Livro \"{livro.Nome}\" cadastrado com sucesso.";
+
             return RedirectToAction("Index", "Home");
         }
+    }
+}
